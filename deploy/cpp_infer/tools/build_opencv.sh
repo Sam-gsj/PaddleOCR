@@ -1,11 +1,10 @@
-root_path="./third_party/opencv-4.7.0"
+root_path="your_opencv_dir"
 install_path=${root_path}/opencv4
 build_dir=${root_path}/build
 
 rm -rf ${build_dir}
 mkdir ${build_dir}
 cd ${build_dir}
-
 cmake .. \
     -DCMAKE_INSTALL_PREFIX=${install_path} \
     -DCMAKE_BUILD_TYPE=Release \
@@ -26,5 +25,3 @@ cmake .. \
 
 make -j4
 make install
-
-
