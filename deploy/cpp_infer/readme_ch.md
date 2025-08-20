@@ -1,4 +1,4 @@
-# 通用OCR产线C++部署
+# 通用 OCR 产线 C++ 部署
 
 - [1. 环境准备](#1)
     - [1.1 编译opencv库](#12)
@@ -9,7 +9,7 @@
     - [2.3 运行](#23)
 - [3. FAQ](#3)
 
-本章节介绍 通用OCR产线的C++部署方法。通用OCR 产线由以下5个模块组成：
+本章节介绍通用 OCR 产线 C++ 部署方法。通用 OCR 产线由以下5个模块组成：
 
 1. 文档图像方向分类模块（可选）
 2. 文本图像矫正模块 (可选)
@@ -25,39 +25,49 @@
     - gcc   8.2（当使用Paddle Inference GPU版本时需要更高版本时，gcc>=11.2）
     - cmake 3.18
 
-- Windows 环境：具体编译方法请参考 [Windows 编译教程](./docs/windows_vs2022_build.md)。
+- Windows 环境：具体编译方法请参考 [Windows 编译教程](./docs/windows_vs2022_build.md)，在编译完成后，后续运行步骤与 Linux 一致。
 
 ### 1.1 编译 OpenCV 库
 
-首先需要编译 OpenCV 库，编译流程如下：
+- 首先需要下载 OpenCV 源码，以 opencv 4.7.0为例，下载命令如下，注意仅支持 OpenCV 4.x。
 
-修改 `tools/build_opencv.sh`，运行下面的命令完成 OpenCV 的编译。
+```bash
+cd deploy/cpp_infer
+wget https://paddle-model-ecology.bj.bcebos.com/paddlex/cpp/libs/opencv-4.7.0.tgz
+tar -xf opencv-4.7.0.tgz
+```
+- 编译 OpenCV 库，编译流程如下：
+
+将 `tools/build_opencv.sh` 脚本中的 `root_path` 变量修改为 `opencv-4.7.0` 目录的绝对路径以及 `install_path` 修改为 `${root_path}/opencv4` 。然后，运行下方的命令以完成 OpenCV 的编译。请注意，`install_path` 指定的路径，在后续编译通用 OCR 产线 demo 时，将作为 OpenCV 库的路径使用。
 
 ```shell
 sh tools/build_opencv.sh
 ```
 
-### 1.2 下载Paddle Inference C++ 预编译包或者手动编译源码
+### 1.2 下载 Paddle Inference C++ 预编译包或者手动编译源码
 
-可以选择直接下载Paddle Inference官网提供的预编译包或者手动编译源码，下文分别进行具体说明。
+可以选择直接下载 Paddle Inference官网提供的预编译包或者手动编译源码，下文分别进行具体说明。
 
 #### 1.2.1 直接下载预编译包（推荐）
-[Paddle Inference官网](https://www.paddlepaddle.org.cn/inference/v3.0/guides/install/download_lib.html) 上提供了Linux预测库，可以在官网查看并选择合适的预编译包（*建议选择paddle版本>=3.0.0版本的预测库* ）。
+
+[Paddle Inference 官网](https://www.paddlepaddle.org.cn/inference/v3.0/guides/install/download_lib.html) 上提供了 Linux 预测库，可以在官网查看并选择合适的预编译包（*建议选择 paddle 版本>=3.0.0版本的预测库* ）。
 
 下载之后解压:
 
 ```shell
 tar -xf paddle_inference.tgz
 ```
-最终会在当前的文件夹中生成`paddle_inference/`的子文件夹。
+最终会在当前的文件夹中生成 `paddle_inference/` 的子文件夹。
+
 #### 1.2.2 预测库源码编译
-[Linux下源码编译](https://www.paddlepaddle.org.cn/inference/v3.0/guides/install/compile/source_compile_under_Linux.html)
+
+可以选择通过源码自行编译预测库。源码编译可灵活配置各类功能和依赖，以适应不同的硬件和软件环境。详细步骤请参考 [Linux 下源码编译](https://www.paddlepaddle.org.cn/inference/v3.0/guides/install/compile/source_compile_under_Linux.html)。
 
 ## 2. 开始运行
 
 ### 2.1 准备模型
 
-可以直接下载 PaddleOCR 提供的推理模型：
+可以直接下载 通用 OCR 产线 提供的推理模型：
 
 <details>
 <summary><b>文档图像方向分类模块（可选）：</b></summary>
@@ -76,7 +86,7 @@ tar -xf paddle_inference.tgz
 <td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-LCNet_x1_0_doc_ori_infer.tar">推理模型</a></td>
 <td>99.06</td>
 <td>7</td>
-<td>基于PP-LCNet_x1_0的文档图像分类模型，含有四个类别，即0度，90度，180度，270度</td>
+<td>基于 PP-LCNet_x1_0 的文档图像分类模型，含有四个类别，即0度，90度，180度，270度</td>
 </tr>
 </tbody>
 </table>
@@ -118,11 +128,18 @@ tar -xf paddle_inference.tgz
 </tr>
 </thead>
 <tbody>
-<td>PP-LCNet_x1_0_textline_ori</td>
+<td>PP-LCNet_x1_0_textline_ori (默认)</td>
 <td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-LCNet_x1_0_textline_ori_infer.tar">推理模型</a></td>
 <td>99.42</td>
 <td>6.5</td>
-<td>基于PP-LCNet_x1_0的文本行分类模型，含有两个类别，即0度，180度</td>
+<td>基于 PP-LCNet_x1_0 的文本行分类模型，含有两个类别，即0度，180度</td>
+</tr>
+<tr>
+<td>PP-LCNet_x0_25_textline_ori</td>
+<td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-LCNet_x0_25_textline_ori_infer.tar">推理模型</a></td>
+<td>98.85</td>
+<td>0.96</td>
+<td>基于 PP-LCNet_x0_25 的文本行分类模型，含有两个类别，即0度，180度</td>
 </tr>
 </tbody>
 </table>
@@ -141,11 +158,32 @@ tar -xf paddle_inference.tgz
 </thead>
 <tbody>
 <tr>
-<td>PP-OCRv5_server_det</td>
+<td>PP-OCRv5_server_det (默认)</td>
 <td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv5_server_det_infer.tar">推理模型</a></td>
 <td>83.8</td>
 <td>84.3</td>
 <td>PP-OCRv5 的服务端文本检测模型，精度更高，适合在性能较好的服务器上部署</td>
+</tr>
+<tr>
+<td>PP-OCRv5_mobile_det</td>
+<td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv5_mobile_det_infer.tar">推理模型</a></td>
+<td>79.0</td>
+<td>4.7</td>
+<td>PP-OCRv5 的移动端文本检测模型，效率更高，适合在端侧设备部署</td>
+</tr>
+<tr>
+<td>PP-OCRv4_server_det</td>
+<td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv4_server_det_infer.tar">推理模型</a></td>
+<td>69.2</td>
+<td>109</td>
+<td>PP-OCRv4 的服务端文本检测模型，精度更高，适合在性能较好的服务器上部署</td>
+</tr>
+<tr>
+<td>PP-OCRv4_mobile_det</td>
+<td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv4_mobile_det_infer.tar">推理模型</a></td>
+<td>63.8</td>
+<td>4.7</td>
+<td>PP-OCRv4 的移动端文本检测模型，效率更高，适合在端侧设备部署</td>
 </tr>
 </tbody>
 </table>
@@ -161,12 +199,41 @@ tar -xf paddle_inference.tgz
 <th>介绍</th>
 </tr>
 <tr>
-<td>PP-OCRv5_server_rec</td>
+<td>PP-OCRv5_server_rec (默认)</td>
 <td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/\
 PP-OCRv5_server_rec_infer.tar">推理模型</a></td>
 <td>86.38</td>
 <td>81</td>
 <td rowspan="2">PP-OCRv5_rec 是新一代文本识别模型。该模型致力于以单一模型高效、精准地支持简体中文、繁体中文、英文、日文四种主要语言，以及手写、竖版、拼音、生僻字等复杂文本场景的识别。在保持识别效果的同时，兼顾推理速度和模型鲁棒性，为各种场景下的文档理解提供高效、精准的技术支撑。</td>
+</tr>
+<tr>
+<td>PP-OCRv5_mobile_rec</td>
+<td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/\
+PP-OCRv5_mobile_rec_infer.tar">推理模型</a></td>
+<td>81.29</td>
+<td>16</td>
+</tr>
+<tr>
+<td>PP-OCRv4_server_rec_doc</td>
+<td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/\
+PP-OCRv4_server_rec_doc_infer.tar">推理模型</a></td>
+<td>86.58</td>
+<td>182</td>
+<td>PP-OCRv4_server_rec_doc 是在 PP-OCRv4_server_rec 的基础上，在更多中文文档数据和PP-OCR训练数据的混合数据训练而成，增加了部分繁体字、日文、特殊字符的识别能力，可支持识别的字符为1.5万+，除文档相关的文字识别能力提升外，也同时提升了通用文字的识别能力</td>
+</tr>
+<tr>
+<td>PP-OCRv4_mobile_rec</td>
+<td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv4_mobile_rec_infer.tar">推理模型</a></td>
+<td>78.74</td>
+<td>10.5</td>
+<td>PP-OCRv4的轻量级识别模型，推理效率高，可以部署在包含端侧设备的多种硬件设备中</td>
+</tr>
+<tr>
+<td>PP-OCRv4_server_rec</td>
+<td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv4_server_rec_infer.tar">推理模型</a></td>
+<td>85.19</td>
+<td>173</td>
+<td>PP-OCRv4的服务器端模型，推理精度高，可以部署在多种不同的服务器上</td>
 </tr>
 </tbody>
 </table>
@@ -183,7 +250,8 @@ PP-OCRv5_mobile_det
 |--inference.yml
 ```
 
-### 2.2 编译PaddleOCR C++预测demo
+### 2.2 编译通用 OCR 产线 C++预测demo
+
 在编译PaddleOCR C++预测demo前，请确保您已经编译好OpenCV库和Paddle Inference预测库。
 
 ```shell
@@ -218,12 +286,12 @@ cmake .. \
 </tr>
 <tr>
 <td><code>OPENCV_DIR</code></td>
-<td>OpenCV编译安装的路径，必填。</td>
+<td>OpenCV编译安装的路径（如上述编译 OpenCV 时的 <code>install_path</code> ，必填。</td>
 <td></td>
 </tr>
 <tr>
 <td><code>LIB_DIR</code></td>
-<td>下载的 <code>paddle_inference</code> 文件夹或编译生成的Paddle Inference库路径（如 <code>build/paddle_inference_install_dir</code> 文件夹），必填。</td>
+<td>下载的 <code>Paddle Inference</code> 的预编译包或手动编译生成的Paddle Inference库路径（如 <code>build/paddle_inference_install_dir</code> 文件夹），必填。</td>
 <td></td>
 </tr>
 <tr>
@@ -246,11 +314,13 @@ cmake .. \
 **注意：以上路径都写绝对路径，不要写相对路径。**
 
 ### 2.3 运行
-在本地使用PaddleOCR C++前，请确保您已经成功编译PaddleOCR C++预测demo。编译完成后，可以在本地使用命令行体验或者根据您的实际需求调用PaddleOCR C++ API进行二次开发，并重新编译生成您自己的应用程序。
+
+在本地使用通用 OCR 产线 C++前，请先成功编译预测 demo。编译后，可通过命令行体验或调用API进行二次开发并重新编译生成应用程序。
 
 **请注意，如果在执行过程中遇到程序失去响应、程序异常退出、内存资源耗尽、推理速度极慢等问题，请尝试参考文档调整配置，例如关闭不需要使用的功能或使用更轻量的模型。**
 
 #### 2.3.1 命令行方式
+
 本demo支持系统串联调用，也支持单个模块的调用。
 
 运行方式：
@@ -266,11 +336,11 @@ cmake .. \
 === "全模块串联"
 
     ```bash
-    ./build/ppocr paddleocr --input your_input --save_path your_save_path/  
-    --doc_orientation_classify_model_dir your_doc_orientation_classify_model_dir
-    --doc_unwarping_model_dir your_doc_unwarping_model_dir
-    --textline_orientation_model_dir your_textline_orientation_model_dir
-    --text_detection_model_dir your_text_detection_model_dir
+    ./build/ppocr paddleocr --input your_input --save_path your_save_path/  \
+    --doc_orientation_classify_model_dir your_doc_orientation_classify_model_dir \
+    --doc_unwarping_model_dir your_doc_unwarping_model_dir \
+    --textline_orientation_model_dir your_textline_orientation_model_dir \
+    --text_detection_model_dir your_text_detection_model_dir \
     --text_recognition_model_dir your_text_recognition_model_dir
     ```
 
@@ -279,7 +349,6 @@ cmake .. \
     ```bash
 
     ```
-
 
 === "文本检测+文本行方向分类+文本识别"
 
@@ -383,18 +452,21 @@ cmake .. \
     ```bash
 
     ```
-#### 2.3.2 C++ API方式集成
+#### 2.3.2 C++ API 方式集成
+
 命令行方式是为了快速体验查看效果，一般来说，在项目中，往往需要通过代码集成，您可以通过几行代码即可完成产线的快速推理，推理代码如下：
+由于通用 OCR 产线配置参数多达
+
 ```c++
 #include "src/API/pipelines/ocr.h"
 
 int main(){
     PaddleOCRParams params;
-    params.doc_orientation_classify_model_dir = your_doc_orientation_classify_model_dir; // 文档方向分类模型路径。
-    params.doc_unwarping_model_dir = your_doc_unwarping_model_dir; //文本图像矫正模型路径。
-    params.textline_orientation_model_dir = your_textline_orientation_model_dir; //文本行方向分类模型路径。
-    params.text_detection_model_dir = your_text_detection_model_dir; //文本检测模型路径
-    params.text_recognition_model_dir = your_text_recognition_model_dir; //文本识别模型路径
+    params.doc_orientation_classify_model_dir = "your_doc_orientation_classify_model_dir"; // 文档方向分类模型路径。
+    params.doc_unwarping_model_dir = "your_doc_unwarping_model_dir"; //文本图像矫正模型路径。
+    params.textline_orientation_model_dir = "your_textline_orientation_model_dir"; //文本行方向分类模型路径。
+    params.text_detection_model_dir = "your_text_detection_model_dir"; //文本检测模型路径
+    params.text_recognition_model_dir = "your_text_recognition_model_dir"; //文本识别模型路径
     params.vis_font_dir  = your_vis_font_dir; //当编译时添加-DUSE_FREETYPE=ON选项，必须提供相应tff字体文件路径。
 
     //params.device = "gpu"; //推理时使用GPU。请确保编译时添加-DWITH_GPU=ON选项，否则使用CPU。
@@ -451,7 +523,7 @@ int main(){
 <td>是否启用 MKL-DNN 加速推理。如果 MKL-DNN 不可用或模型不支持通过 MKL-DNN 加速，即使设置了此标志，也不会使用加速。
 </td>
 <td><code>bool</code></td>
-<td><code>True</code></td>
+<td><code>true</code></td>
 </tr>
 <tr>
 <td><code>mkldnn_cache_capacity</code></td>
@@ -466,12 +538,6 @@ MKL-DNN 缓存容量。
 <td>PaddleInference CPU 加速库线程数量</td>
 <td><code>int</code></td>
 <td><code>8</code></td>
-</tr>
-<tr>
-<td><code>thread_num</code></td>
-<td>在 CPU 上进行推理时使用的线程数。实例化相应数量的推理实例并发执行，根据硬件资源合理设置。如果不设置，默认值为1。</td>
-<td><code>int</code></td>
-<td><code>1</code></td>
 </tr>
 <tr>
 <td><code>paddlex_config</code></td>
@@ -496,21 +562,21 @@ MKL-DNN 缓存容量。
 <tbody>
 <tr>
 <td><code>use_doc_orientation_classify</code></td>
-<td>是否加载并使用文档方向分类模块。如果不设置，将使用产线初始化的该参数值，默认初始化为<code>True</code>。</td>
+<td>是否加载并使用文档方向分类模块。如果不设置，将使用产线初始化的该参数值，默认初始化为<code>true</code>。</td>
 <td><code>bool</code></td>
-<td></td>
+<td><code>true</code></td>
 </tr>
 <tr>
 <td><code>use_doc_unwarping</code></td>
-<td>是否加载并使用文本图像矫正模块。如果不设置，将使用产线初始化的该参数值，默认初始化为<code>True</code>。</td>
+<td>是否加载并使用文本图像矫正模块。如果不设置，将使用产线初始化的该参数值，默认初始化为<code>true</code>。</td>
 <td><code>bool</code></td>
-<td></td>
+<td><code>true</code></td>
 </tr>
 <tr>
 <td><code>use_textline_orientation</code></td>
-<td>是否加载并使用文本行方向模块。如果不设置，将使用产线初始化的该参数值，默认初始化为<code>True</code>。</td>
+<td>是否加载并使用文本行方向模块。如果不设置，将使用产线初始化的该参数值，默认初始化为<code>true</code>。</td>
 <td><code>bool</code></td>
-<td></td>
+<td><code>true</code></td>
 </tr>
 </tbody>
 </table>
@@ -531,7 +597,7 @@ MKL-DNN 缓存容量。
 <td><code>text_detection_model_name</code></td>
 <td>文本检测模型的名称。如果不设置，将会使用产线默认模型。当传入文本检测模型路径的模型名称与产线默认文本识别模型名称配置不一致时，需指定传入模型的名称。</td>
 <td><code>str</code></td>
-<td></td>
+<td>PP-OCRv5_server_det</td>
 </tr>
 <tr>
 <td><code>text_detection_model_dir</code></td>
@@ -545,22 +611,22 @@ MKL-DNN 缓存容量。
 大于 <code>0</code> 的任意整数。如果不设置，将使用产线初始化的该参数值，默认初始化为 <code>64</code>。
 </td>
 <td><code>int</code></td>
-<td></td>
+<td><code>64</code></td>
 </tr>
 <tr>
 <td><code>text_det_limit_type</code></td>
 <td>文本检测的边长度限制类型。支持 <code>min</code> 和 <code>max</code>，<code>min</code> 表示保证图像最短边不小于 <code>det_limit_side_len</code>，<code>max</code> 表示保证图像最长边不大于 <code>limit_side_len</code>。如果不设置，将使用产线初始化的该参数值，默认初始化为 <code>min</code>。
 </td>
 <td><code>str</code></td>
-<td></td>
+<td><code>min</code></td>
 </tr>
 <tr>
 <td><code>text_det_thresh</code></td>
 <td>文本检测像素阈值，输出的概率图中，得分大于该阈值的像素点才会被认为是文字像素点。
-大于<code>0</code>的任意浮点数。如果不设置，将使用产线初始化的该参数值（默认为 <code>0.3</code>）。
+大于<code>0</code>的任意浮点数。如果不设置，将使用产线初始化的该参数值。
 </td>
 <td><code>float</code></td>
-<td></td>
+<td><code>0.3</code></td>
 </tr>
 <tr>
 <td><code>text_det_box_thresh</code></td>
@@ -568,14 +634,14 @@ MKL-DNN 缓存容量。
 大于 <code>0</code> 的任意浮点数。如果不设置，将使用产线初始化的该参数值（默认为 <code>0.6</code>）。
 </td>
 <td><code>float</code></td>
-<td></td>
+<td><code>0.6</code></td>
 </tr>
 <tr>
 <td><code>text_det_unclip_ratio</code></td>
-<td>文本检测扩张系数，使用该方法对文字区域进行扩张，该值越大，扩张的面积越大。大于 <code>0</code> 的任意浮点数。如果不设置，将使用产线初始化的该参数值（默认为 <code>2.0</code>）。
+<td>文本检测扩张系数，使用该方法对文字区域进行扩张，该值越大，扩张的面积越大。大于 <code>0</code> 的任意浮点数。如果不设置，将使用产线初始化的该参数值。
 </td>
 <td><code>float</code></td>
-<td></td>
+<td><code>1.5</code></td>
 </tr>
 <tr>
 <td><code>text_det_input_shape</code></td>
@@ -602,31 +668,31 @@ MKL-DNN 缓存容量。
 <td><code>doc_orientation_classify_model_name</code></td>
 <td>文档方向分类模型的名称。如果不设置，将会使用产线默认模型。当传入文档方向分类模型与产线默认模型不一致时，需指定传入模型的名称。</td>
 <td><code>str</code></td>
-<td><code></code></td>
+<td><code>PP-LCNet_x1_0_doc_ori</code></td>
 </tr>
 <tr>
 <td><code>doc_orientation_classify_model_dir</code></td>
 <td>文档方向分类模型的目录路径。当设置<code>use_doc_orientation_classify = false</code>时，可不添加。</td>
 <td><code>str</code></td>
-<td><code></code></td>
+<td></td>
 </tr>
 <tr>
 <td><code>textline_orientation_model_name</code></td>
 <td>文本行方向分类模型的名称。如果不设置，将会使用产线默认模型。当传入文本行方向分类模型与产线默认模型不一致时，需指定传入模型的名称。</td>
 <td><code>str</code></td>
-<td><code></code></td>
+<td><code>PP-LCNet_x1_0_textline_ori</code></td>
 </tr>
 <tr>
 <td><code>textline_orientation_model_dir</code></td>
 <td>文本行方向分类模型的目录路径。当设置<code>use_textline_orientation = false</code>时，可不添加。</td>
 <td><code>str</code></td>
-<td><code></code></td>
+<td></td>
 </tr>
 <tr>
 <td><code>textline_orientation_batch_size</code></td>
 <td>文本行方向模型的batch size。如果不设置，将会使用产线默认模型。</td>
 <td><code>int</code></td>
-<td><code></code></td>
+<td><code>6</code></td>
 </tr>
 </tbody>
 </table>
@@ -647,31 +713,31 @@ MKL-DNN 缓存容量。
 <td><code>text_recognition_model_name</code></td>
 <td>文本识别模型的名称。如果不设置，将会使用产线默认模型。当传入文本识别模型路径的模型名称与产线默认文本识别模型名称配置不一致时，需指定传入模型的名称。</td>
 <td><code>str</code></td>
-<td><code></code></td>
+<td><code>PP-OCRv5_server_rec</code></td>
 </tr>
 <tr>
 <td><code>text_recognition_model_dir</code></td>
 <td>文本识别模型的目录路径，必填。</td>
 <td><code>str</code></td>
-<td><code></code></td>
+<td></td>
 </tr>
 <tr>
 <td><code>text_recognition_batch_size</code></td>
 <td>文本识别模型的batch size。如果不设置，将会使用产线默认值。</td>
 <td><code>int</code></td>
-<td><code></code></td>
+<td><code>6</code></td>
 </tr>
 <tr>
 <td><code>text_rec_score_thresh</code></td>
 <td>文本识别阈值，得分大于该阈值的文本结果会被保留。大于<code>0</code>的任意浮点数。</td>
 <td><code>float</code></td>
-<td><code></code></td>
+<td><code>0.0</code></td>
 </tr>
 <tr>
 <td><code>text_rec_input_shape</code></td>
 <td>文本识别的输入形状，您可以设置3个值代表C，H，W。</td>
 <td><code>std::vector</code></td>
-<td><code></code></td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -707,8 +773,6 @@ MKL-DNN 缓存容量。
 注意：命令行方式使用上述可调节参数，加前缀<code>--</code>，如：<code>--input your_image.jpg --save_path ./your_output/</code>。
 
 </details>
-
-
 
 ## 3. 额外功能
 
@@ -777,8 +841,14 @@ make install
 ```shell
 sh tools/build_opencv.sh
 ```
-其中`root_path`为下载的opencv源码路径，`install_path`为opencv的安装路径，`make install`完成之后，会在该文件夹下生成opencv头文件和库文件，用于后面的OCR代码编译。
+其中`root_path`为下载的opencv源码路径，`install_path`为opencv的安装路径，请注意` install_path` 指定的路径，在上述编译通用 OCR 产线 demo 时，将作为 OpenCV 库的路径使用。
+
+注意：如果完成编译包含 FreeType 的 OpenCV，在编译通用 OCR 产线 demo 时，需要在 `tools/build.sh` 设置 `-DUSE_FREETYPE=ON` 开启文字渲染功能，并且显示指定 `--vis_font_dir your_tff_path` 提供相应ttf字体文件路径。
 
 ## 4. FAQ
+
+1. 遇到报错 `Model name mismatch, please input the correct model dir. model dir is xxx, but model name is xxx` ，说明默认模型名称和传入模型名称不匹配，需要显示指定。比如文本识别模型默认名称是 `PP-OCRv5_server_rec `，但传入模型名称是 `PP-OCRv5_mobile_rec` 对于命令行调用方式需要显示指定 `--text_recognition_model_name PP-OCRv5_mobile_rec`，其他模型同理。
+
+2. 在Windows中控制台输出出现乱码。原因是控制台默认的字符编码通常是 GBK ，请设置为 UTF-8。
 
 1. TODO 
